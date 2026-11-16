@@ -1,0 +1,67 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.sqlite3
+*.db
+backend/venv/
+.venv/
+env/
+venv/
+
+# PyInstaller Build & Dist artifacts
+build/
+dist/
+*.spec.bak
+
+# Large Executables & Binaries (FFmpeg is ~220MB, exceeds GitHub 100MB limit)
+bin/*.exe
+bin/*.dll
+bin/*.zip
+
+# Media Files & Archives (Never commit test media or packages)
+*.mp4
+*.mkv
+*.mov
+*.avi
+*.mp3
+*.wav
+*.srt
+*.vtt
+*.ass
+*.txt
+*.zip
+*.tar.gz
+!backend/requirements.txt
+
+# Local Storage (Keep directory structure via .gitkeep)
+storage/uploads/*
+storage/temp_audio/*
+storage/exports/*
+storage/models/*
+storage/*.db
+storage/*.sqlite
+storage/*.sqlite3
+!storage/uploads/.gitkeep
+!storage/temp_audio/.gitkeep
+!storage/exports/.gitkeep
+!storage/models/.gitkeep
+
+# Node & Frontend
+node_modules/
+frontend/node_modules/
+frontend/dist/
+.vite/
+
+# Tauri Build Cache
+frontend/src-tauri/target/
+
+# Environment, OS & Editor configs
+.env
+.env.*
+.DS_Store
+Thumbs.db
+*.log
+.vscode/*
+!.vscode/extensions.json
+.idea/
