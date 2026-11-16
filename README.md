@@ -2,7 +2,19 @@
 
 > **Aplikasi Pembuat Subtitle AI 100% Offline & Word-Level SRT Khusus CapCut untuk Video Kreator Indonesia**
 
+[![Download IndoCaption](https://img.shields.io/badge/Download-IndoCaption_v1.0.0_(Windows)-amber?style=for-the-badge&logo=windows)](https://github.com/WildanasJaffar/indo-caption/releases/latest)
+
 IndoCaption adalah aplikasi desktop mandiri untuk menghasilkan caption otomatis dari video dengan akurasi tinggi menggunakan model **Faster-Whisper (CTranslate2)** dan **FFmpeg**. Seluruh proses berjalan di perangkat lokal Anda tanpa mengirim data ke internet dan tanpa biaya API.
+
+---
+
+## 📥 Download Aplikasi (Siap Pakai untuk Pengguna)
+
+Pengguna yang ingin langsung menggunakan aplikasi tanpa perlu menginstal Python atau Node.js dapat mengunduh versi portable siap pakai:
+1. Buka halaman **[Releases Terbaru](https://github.com/WildanasJaffar/indo-caption/releases/latest)**.
+2. Unduh file `IndoCaption-v1.0.0-windows.zip`.
+3. Ekstrak file zip tersebut di komputer Anda.
+4. Dobel klik `IndoCaption.exe` untuk mulai membuat subtitle otomatis!
 
 ---
 
