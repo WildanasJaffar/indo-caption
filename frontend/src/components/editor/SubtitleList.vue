@@ -19,6 +19,19 @@
             <span>Follow</span>
           </label>
 
+          <!-- Time Shift Toggle Button -->
+          <button
+            class="px-2 py-1 rounded-md border text-[11px] font-semibold flex items-center gap-1 cursor-pointer transition-all"
+            :class="showTimeShiftBar
+              ? 'bg-cyan-500/20 border-cyan-500/60 text-cyan-300'
+              : 'bg-[#141722] hover:bg-[#1f2434] border-[#252b3d] text-slate-300 hover:text-cyan-400'"
+            @click="showTimeShiftBar = !showTimeShiftBar"
+            title="Geser waktu mulai & selesai semua subtitle secara massal"
+          >
+            <Clock class="w-3 h-3 text-cyan-400" />
+            <span class="hidden sm:inline">Geser Waktu</span>
+          </button>
+
           <!-- Auto-sort Chronologically Button -->
           <button
             class="px-2 py-1 rounded-md bg-[#141722] hover:bg-[#1f2434] border border-[#252b3d] text-slate-300 hover:text-[#ffb800] text-[11px] font-semibold flex items-center gap-1 cursor-pointer transition-all"
@@ -79,6 +92,55 @@
           />
         </div>
       </div>
+
+      <!-- Row 3 (Collapsible): Global Time Shift Deck -->
+      <transition enter-active-class="transition duration-150 ease-out" enter-from-class="opacity-0 -translate-y-1" enter-to-class="opacity-100 translate-y-0" leave-active-class="transition duration-100 ease-in" leave-from-class="opacity-100 translate-y-0" leave-to-class="opacity-0 -translate-y-1">
+        <div v-if="showTimeShiftBar" class="p-2 rounded-lg bg-[#090b0f] border border-cyan-500/30 shadow-lg flex flex-wrap items-center justify-between gap-2 text-xs">
+          <div class="flex items-center gap-1.5">
+            <Clock class="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+            <span class="text-[10px] font-mono font-bold uppercase text-slate-300">Geser Waktu:</span>
+            <!-- Quick offset pills -->
+            <div class="flex items-center gap-1">
+              <button
+                v-for="preset in [-0.5, -0.2, 0.2, 0.5]"
+                :key="preset"
+                @click="applyQuickShift(preset)"
+                class="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-[#131622] hover:bg-cyan-500/20 border border-[#252b3d] hover:border-cyan-500/50 text-slate-300 hover:text-cyan-300 transition-all cursor-pointer"
+                :title="`Geser seluruh subtitle ${preset > 0 ? '+' : ''}${preset}s`"
+              >
+                {{ preset > 0 ? `+${preset}s` : `${preset}s` }}
+              </button>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-1.5">
+            <div class="flex items-center gap-1 bg-[#10121a] border border-[#242938] rounded px-1.5 py-0.5">
+              <input
+                type="number"
+                step="0.05"
+                v-model.number="customOffset"
+                placeholder="±detik"
+                class="w-14 bg-transparent text-center text-slate-200 text-[10px] font-mono focus:outline-none"
+              />
+              <span class="text-[9px] text-slate-500 font-mono">dtk</span>
+            </div>
+            <button
+              @click="applyCustomShift"
+              class="px-2 py-0.5 rounded bg-cyan-400 hover:bg-cyan-300 text-black text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer disabled:opacity-40"
+              :disabled="!customOffset || customOffset === 0"
+            >
+              Terapkan
+            </button>
+            <button
+              @click="showTimeShiftBar = false"
+              class="text-slate-500 hover:text-slate-300 text-xs px-1 cursor-pointer"
+              title="Tutup"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+      </transition>
     </div>
 
     <!-- Subtitle Cards Scroll Area with Drag & Drop Reordering -->
@@ -134,7 +196,7 @@
 
 <script setup>
 import { ref, computed, watch, nextTick } from 'vue';
-import { Plus, Sparkles, Search, FileText, ArrowUpDown } from '@lucide/vue';
+import { Plus, Sparkles, Search, FileText, ArrowUpDown, Clock } from '@lucide/vue';
 import SubtitleItem from './SubtitleItem.vue';
 
 const props = defineProps({
@@ -160,12 +222,27 @@ const emit = defineEmits([
   'reorder-indices',
   'sort-by-time',
   'insert-after',
+  'time-shift',
 ]);
 
 const autoScroll = ref(true);
 const maxWords = ref(4);
 const searchQuery = ref('');
 const listContainer = ref(null);
+
+// Global Time Shift State
+const showTimeShiftBar = ref(false);
+const customOffset = ref(0.2);
+
+function applyQuickShift(val) {
+  emit('time-shift', val);
+}
+
+function applyCustomShift() {
+  if (customOffset.value && customOffset.value !== 0) {
+    emit('time-shift', customOffset.value);
+  }
+}
 
 // Drag & Drop Reordering State
 const draggedIndex = ref(null);

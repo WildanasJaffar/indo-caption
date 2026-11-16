@@ -42,6 +42,7 @@
           @reorder-indices="handleReorderSubtitles"
           @sort-by-time="handleSortByTime"
           @insert-after="handleInsertAfter"
+          @time-shift="handleTimeShift"
         />
       </section>
 
@@ -520,6 +521,18 @@ async function handleSortByTime() {
     showToast('Subtitle berhasil diurutkan berdasarkan waktu!');
   } catch (err) {
     alert(`Gagal mengurutkan: ${err.message}`);
+  }
+}
+
+async function handleTimeShift(offset) {
+  if (!currentProject.value) return;
+  try {
+    const res = await subtitleApi.timeShift(currentProject.value.id, offset);
+    subtitles.value = res.data;
+    const sign = offset > 0 ? '+' : '';
+    showToast(`Semua subtitle berhasil digeser ${sign}${offset} detik`);
+  } catch (err) {
+    alert(`Gagal menggeser waktu: ${err.response?.data?.detail || err.message}`);
   }
 }
 

@@ -43,14 +43,25 @@
               </p>
             </div>
           </div>
-          <button
-            @click="downloadFile(getSrtWordsUrl, `${cleanName}_word_level.srt`)"
-            :disabled="downloadingName !== null"
-            class="studio-btn-primary px-3.5 py-1.5 rounded-md text-xs font-black uppercase tracking-wider flex items-center gap-1.5 shrink-0 cursor-pointer"
-          >
-            <Download class="w-3.5 h-3.5 text-black" />
-            <span>{{ downloadingName === `${cleanName}_word_level.srt` ? 'Menyimpan...' : 'Download' }}</span>
-          </button>
+          <div class="flex items-center gap-2 shrink-0">
+            <button
+              @click="copyContent(getSrtWordsUrl, 'Word-Level SRT')"
+              class="px-2.5 py-1.5 rounded-md bg-[#1d212d] hover:bg-[#272c3d] border border-[#2f354a] text-slate-200 hover:text-[#ffb800] text-xs font-bold flex items-center gap-1.5 cursor-pointer transition-all"
+              title="Salin isi SRT kata per kata ke clipboard"
+            >
+              <Check v-if="copiedType === 'Word-Level SRT'" class="w-3.5 h-3.5 text-emerald-400" />
+              <Copy v-else class="w-3.5 h-3.5" />
+              <span>{{ copiedType === 'Word-Level SRT' ? 'Tersalin!' : 'Salin' }}</span>
+            </button>
+            <button
+              @click="downloadFile(getSrtWordsUrl, `${cleanName}_word_level.srt`)"
+              :disabled="downloadingName !== null"
+              class="studio-btn-primary px-3.5 py-1.5 rounded-md text-xs font-black uppercase tracking-wider flex items-center gap-1.5 shrink-0 cursor-pointer"
+            >
+              <Download class="w-3.5 h-3.5 text-black" />
+              <span>{{ downloadingName === `${cleanName}_word_level.srt` ? 'Menyimpan...' : 'Download' }}</span>
+            </button>
+          </div>
         </div>
 
         <!-- 2. Standard Subtitle Formats Grid -->
@@ -61,13 +72,23 @@
               <span class="font-bold text-slate-200 block text-xs">Standard SRT (.srt)</span>
               <span class="text-[10px] text-slate-500">Format standar per baris</span>
             </div>
-            <button
-              @click="downloadFile(getSrtUrl, `${cleanName}_captions.srt`)"
-              :disabled="downloadingName !== null"
-              class="px-2.5 py-1 rounded bg-[#161822] hover:bg-[#222736] border border-[#262c3e] text-slate-300 hover:text-white text-[11px] font-bold cursor-pointer transition-all"
-            >
-              {{ downloadingName === `${cleanName}_captions.srt` ? '...' : 'Unduh' }}
-            </button>
+            <div class="flex items-center gap-1">
+              <button
+                @click="copyContent(getSrtUrl, 'Standard SRT')"
+                class="p-1.5 rounded bg-[#161822] hover:bg-[#222736] border border-[#262c3e] text-slate-300 hover:text-white transition-all cursor-pointer"
+                title="Salin teks SRT ke clipboard"
+              >
+                <Check v-if="copiedType === 'Standard SRT'" class="w-3 h-3 text-emerald-400" />
+                <Copy v-else class="w-3 h-3" />
+              </button>
+              <button
+                @click="downloadFile(getSrtUrl, `${cleanName}_captions.srt`)"
+                :disabled="downloadingName !== null"
+                class="px-2.5 py-1 rounded bg-[#161822] hover:bg-[#222736] border border-[#262c3e] text-slate-300 hover:text-white text-[11px] font-bold cursor-pointer transition-all"
+              >
+                {{ downloadingName === `${cleanName}_captions.srt` ? '...' : 'Unduh' }}
+              </button>
+            </div>
           </div>
 
           <!-- WebVTT -->
@@ -76,13 +97,23 @@
               <span class="font-bold text-slate-200 block text-xs">WebVTT (.vtt)</span>
               <span class="text-[10px] text-slate-500">Web player & YouTube</span>
             </div>
-            <button
-              @click="downloadFile(getVttUrl, `${cleanName}_captions.vtt`)"
-              :disabled="downloadingName !== null"
-              class="px-2.5 py-1 rounded bg-[#161822] hover:bg-[#222736] border border-[#262c3e] text-slate-300 hover:text-white text-[11px] font-bold cursor-pointer transition-all"
-            >
-              {{ downloadingName === `${cleanName}_captions.vtt` ? '...' : 'Unduh' }}
-            </button>
+            <div class="flex items-center gap-1">
+              <button
+                @click="copyContent(getVttUrl, 'WebVTT')"
+                class="p-1.5 rounded bg-[#161822] hover:bg-[#222736] border border-[#262c3e] text-slate-300 hover:text-white transition-all cursor-pointer"
+                title="Salin WebVTT ke clipboard"
+              >
+                <Check v-if="copiedType === 'WebVTT'" class="w-3 h-3 text-emerald-400" />
+                <Copy v-else class="w-3 h-3" />
+              </button>
+              <button
+                @click="downloadFile(getVttUrl, `${cleanName}_captions.vtt`)"
+                :disabled="downloadingName !== null"
+                class="px-2.5 py-1 rounded bg-[#161822] hover:bg-[#222736] border border-[#262c3e] text-slate-300 hover:text-white text-[11px] font-bold cursor-pointer transition-all"
+              >
+                {{ downloadingName === `${cleanName}_captions.vtt` ? '...' : 'Unduh' }}
+              </button>
+            </div>
           </div>
 
           <!-- ASS Styled -->
@@ -91,13 +122,23 @@
               <span class="font-bold text-slate-200 block text-xs">Styled ASS (.ass)</span>
               <span class="text-[10px] text-slate-500">Warna, font & stroke tersimpan</span>
             </div>
-            <button
-              @click="downloadFile(getAssUrl, `${cleanName}_styled.ass`)"
-              :disabled="downloadingName !== null"
-              class="px-2.5 py-1 rounded bg-[#161822] hover:bg-[#222736] border border-[#262c3e] text-slate-300 hover:text-white text-[11px] font-bold cursor-pointer transition-all"
-            >
-              {{ downloadingName === `${cleanName}_styled.ass` ? '...' : 'Unduh' }}
-            </button>
+            <div class="flex items-center gap-1">
+              <button
+                @click="copyContent(getAssUrl, 'Styled ASS')"
+                class="p-1.5 rounded bg-[#161822] hover:bg-[#222736] border border-[#262c3e] text-slate-300 hover:text-white transition-all cursor-pointer"
+                title="Salin file ASS ke clipboard"
+              >
+                <Check v-if="copiedType === 'Styled ASS'" class="w-3 h-3 text-emerald-400" />
+                <Copy v-else class="w-3 h-3" />
+              </button>
+              <button
+                @click="downloadFile(getAssUrl, `${cleanName}_styled.ass`)"
+                :disabled="downloadingName !== null"
+                class="px-2.5 py-1 rounded bg-[#161822] hover:bg-[#222736] border border-[#262c3e] text-slate-300 hover:text-white text-[11px] font-bold cursor-pointer transition-all"
+              >
+                {{ downloadingName === `${cleanName}_styled.ass` ? '...' : 'Unduh' }}
+              </button>
+            </div>
           </div>
 
           <!-- Plain TXT -->
@@ -106,13 +147,23 @@
               <span class="font-bold text-slate-200 block text-xs">Transkrip TXT (.txt)</span>
               <span class="text-[10px] text-slate-500">Naskah teks tanpa timing</span>
             </div>
-            <button
-              @click="downloadFile(getTxtUrl, `${cleanName}_transcript.txt`)"
-              :disabled="downloadingName !== null"
-              class="px-2.5 py-1 rounded bg-[#161822] hover:bg-[#222736] border border-[#262c3e] text-slate-300 hover:text-white text-[11px] font-bold cursor-pointer transition-all"
-            >
-              {{ downloadingName === `${cleanName}_transcript.txt` ? '...' : 'Unduh' }}
-            </button>
+            <div class="flex items-center gap-1">
+              <button
+                @click="copyContent(getTxtUrl, 'Transkrip TXT')"
+                class="p-1.5 rounded bg-[#161822] hover:bg-[#222736] border border-[#262c3e] text-slate-300 hover:text-white transition-all cursor-pointer"
+                title="Salin transkrip teks ke clipboard"
+              >
+                <Check v-if="copiedType === 'Transkrip TXT'" class="w-3 h-3 text-emerald-400" />
+                <Copy v-else class="w-3 h-3" />
+              </button>
+              <button
+                @click="downloadFile(getTxtUrl, `${cleanName}_transcript.txt`)"
+                :disabled="downloadingName !== null"
+                class="px-2.5 py-1 rounded bg-[#161822] hover:bg-[#222736] border border-[#262c3e] text-slate-300 hover:text-white text-[11px] font-bold cursor-pointer transition-all"
+              >
+                {{ downloadingName === `${cleanName}_transcript.txt` ? '...' : 'Unduh' }}
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -131,7 +182,7 @@
 
 <script setup>
 import { ref, computed } from 'vue';
-import { Download } from '@lucide/vue';
+import { Download, Copy, Check } from '@lucide/vue';
 
 const props = defineProps({
   isOpen: {
@@ -172,6 +223,30 @@ const cleanName = computed(() => {
 
 const downloadingName = ref(null);
 const feedbackMsg = ref('');
+const copiedType = ref(null);
+
+async function copyContent(url, label) {
+  if (!url || url === '#') return;
+  try {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+    const text = await res.text();
+    await navigator.clipboard.writeText(text);
+    copiedType.value = label;
+    feedbackMsg.value = `Berhasil menyalin ${label} ke clipboard!`;
+    setTimeout(() => {
+      if (copiedType.value === label) {
+        copiedType.value = null;
+      }
+    }, 2500);
+    setTimeout(() => {
+      feedbackMsg.value = '';
+    }, 4500);
+  } catch (err) {
+    console.error('Clipboard copy error:', err);
+    alert('Gagal menyalin ke clipboard: ' + err.message);
+  }
+}
 
 async function downloadFile(url, defaultFilename) {
   if (!url || url === '#') return;

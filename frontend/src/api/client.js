@@ -43,6 +43,7 @@ export const subtitleApi = {
   reorder: (projectId, subtitleIds) => api.post(`/subtitles/${projectId}/reorder`, { subtitle_ids: subtitleIds }),
   swap: (projectId, subId1, subId2) => api.post(`/subtitles/${projectId}/swap`, { subtitle_id_1: subId1, subtitle_id_2: subId2 }),
   sortByTime: (projectId) => api.post(`/subtitles/${projectId}/sort-by-time`),
+  timeShift: (projectId, offsetSeconds) => api.post(`/subtitles/${projectId}/time-shift`, { offset_seconds: offsetSeconds }),
 };
 
 export const exportApi = {

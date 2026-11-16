@@ -30,6 +30,9 @@ class SwapRequest(BaseModel):
     subtitle_id_1: int
     subtitle_id_2: int
 
+class TimeShiftRequest(BaseModel):
+    offset_seconds: float
+
 @router.get("/{project_id}", response_model=List[SubtitleSegmentRead])
 def get_project_subtitles(project_id: int, session: Session = Depends(get_session)):
     subs = session.exec(
@@ -237,6 +240,68 @@ def sort_subtitles_by_time(
             words=s.words
         )
         for s in subs
+    ]
+
+@router.post("/{project_id}/time-shift", response_model=List[SubtitleSegmentRead])
+def time_shift_subtitles(
+    project_id: int,
+    req: TimeShiftRequest,
+    session: Session = Depends(get_session)
+):
+    """
+    Shifts the start and end times of all subtitles in the project by offset_seconds.
+    Also shifts all word-level timestamps proportionally and prevents negative timestamps.
+    """
+    subs = session.exec(
+        select(SubtitleSegment)
+        .where(SubtitleSegment.project_id == project_id)
+        .order_by(SubtitleSegment.sequence.asc())
+    ).all()
+
+    offset = round(req.offset_seconds, 3)
+    result = []
+
+    for s in subs:
+        new_start = max(0.0, round(s.start_time + offset, 3))
+        new_end = max(round(new_start + 0.1, 3), round(s.end_time + offset, 3))
+
+        s.start_time = new_start
+        s.end_time = new_end
+
+        # Shift word timestamps
+        words = s.words
+        if words:
+            shifted_words = []
+            for w in words:
+                w_start = max(0.0, round(float(w.get("start", new_start)) + offset, 3))
+                w_end = max(round(w_start + 0.03, 3), round(float(w.get("end", new_end)) + offset, 3))
+                shifted_words.append({
+                    "word": w.get("word", ""),
+                    "start": w_start,
+                    "end": w_end,
+                    "probability": w.get("probability", 1.0)
+                })
+            s.set_words(shifted_words)
+        else:
+            s.set_words(sync_words_with_text(s.text, [], s.start_time, s.end_time))
+
+        session.add(s)
+        result.append(s)
+
+    session.commit()
+
+    return [
+        SubtitleSegmentRead(
+            id=s.id,
+            project_id=s.project_id,
+            sequence=s.sequence,
+            start_time=s.start_time,
+            end_time=s.end_time,
+            text=s.text,
+            words_json=s.words_json,
+            words=s.words
+        )
+        for s in result
     ]
 
 @router.delete("/{subtitle_id}")
