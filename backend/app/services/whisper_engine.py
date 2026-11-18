@@ -26,7 +26,14 @@ import huggingface_hub
 from faster_whisper import WhisperModel
 from faster_whisper.utils import _MODELS
 import ctranslate2
-from app.config import DEFAULT_WHISPER_MODEL, resolve_model_dir
+from app.config import (
+    DEFAULT_WHISPER_MODEL,
+    resolve_model_dir,
+    validate_model_bin,
+    auto_heal_hf_model,
+    STORAGE_DIR,
+    USER_MODELS_DIR,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -67,6 +74,27 @@ def ensure_model_downloaded(
     target_dir = resolve_model_dir(model_size)
     target_dir.mkdir(parents=True, exist_ok=True)
 
+    # 0. Check standalone model directories (plain directory with real model.bin)
+    standalone_dirs = [
+        target_dir / model_size,
+        target_dir / repo_id.split("/")[-1],
+        STORAGE_DIR / "models" / model_size,
+        STORAGE_DIR / "models" / repo_id.split("/")[-1],
+        USER_MODELS_DIR / model_size,
+        USER_MODELS_DIR / repo_id.split("/")[-1],
+    ]
+    for s_dir in standalone_dirs:
+        if s_dir.is_dir() and validate_model_bin(s_dir / "model.bin"):
+            logger.info(f"Using standalone Whisper model from: {s_dir}")
+            return str(s_dir)
+
+    folder_name = f"models--{repo_id.replace('/', '--')}"
+    # Heal any existing HF cache directories across search paths
+    for base_p in [target_dir, STORAGE_DIR / "models", USER_MODELS_DIR]:
+        candidate_hf = base_p / folder_name
+        if candidate_hf.is_dir():
+            auto_heal_hf_model(candidate_hf)
+
     allow_patterns = [
         "config.json",
         "preprocessor_config.json",
@@ -83,7 +111,7 @@ def ensure_model_downloaded(
             allow_patterns=allow_patterns,
             local_files_only=True,
         )
-        if cached_path and (Path(cached_path) / "model.bin").exists():
+        if cached_path and validate_model_bin(Path(cached_path) / "model.bin"):
             return cached_path
     except Exception:
         pass
@@ -229,6 +257,12 @@ def get_whisper_model(
         _loaded_model_name = None
         gc.collect()
         err_str = str(exc)
+        if "774843950" in err_str or "unsupported model binary version" in err_str.lower():
+            raise RuntimeError(
+                f"File model '{model_size}' tidak valid atau rusak (terdeteksi shortcut teks bukan file biner 1.6 GB). "
+                "Hal ini terjadi jika folder model disalin lewat USB Flashdisk/ZIP tanpa menyertakan file 'blobs' asli atau tanpa dereference symlink. "
+                "Silakan unduh ulang model melalui tombol Auto Caption, atau gunakan file model mandiri."
+            ) from exc
         if "mkl_malloc" in err_str.lower() or "allocate memory" in err_str.lower() or isinstance(exc, MemoryError):
             avail_mb = get_available_commit_mb()
             avail_info = f" (sisa memori virtual: {avail_mb} MB)" if avail_mb is not None else ""
